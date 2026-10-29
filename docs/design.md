@@ -349,8 +349,8 @@ allow = "any"        # "any" (vanilla Java and Horizon) or "horizon" (Horizon cl
   - `hzs` runs offline mode only on loopback (benches and tests). On any other address it refuses to start
     with `online-mode=false`. This follows horizon's own rule: no play without an owned account.
   - No other auth providers, ever.
-  - The official server runs offline mode today, so moving it to `hzs` means moving it to online mode. That is
-    Ludovic's decision (9.2).
+  - The official server was listed as offline mode. If it still is, moving it to `hzs` means moving it to online
+    mode. That is Ludovic's decision (9.2).
 
 ## 7. Memory and start
 
@@ -407,29 +407,34 @@ negotiation, so a Horizon client still plays on every vanilla server.
 W0 and W1 come first: without a bench that repeats within 5 %, no tick PR can show its gain. W2 then gates
 W4 to W6, and W3 and W8 can run beside it.
 
-### 9.2 Before the official server can leave Pumpkin
+### 9.2 Moving the official server to `hzs`
 
-horizon.bunchy7s.dev runs Pumpkin today, hosted by bunchy7s. Before it switches, we need from him (asked in
-#mod-chat through the orchestrator):
-1. **The plugins and features he relies on.**
-   - The kira-pumpkin plugin's `/game/ask`. In `hzs`, a built-in `[kira]` bridge registers the command and
-     calls Kira's API on a worker thread. Kira can also read status and players through the control API
-     (`hzs-ops`, token on loopback).
-   - Anything else he uses: permissions, proxies (Velocity?), the query port, management.
-2. **Bedrock players?** Pumpkin also serves Bedrock. `hzs` is Java only. If Bedrock players are on the server,
-   that is a decision for Ludovic.
-3. **The world.** Pumpkin's config names its own chunk format (`[world.chunk] type = "pump"`). Either the world
-   is exported to Anvil once (a converter, if the format is documented; we don't read Pumpkin's code), or the
-   official server starts a fresh world.
-4. **Operations:** backups he keeps, restart schedule, the log he watches, how he deploys (systemd, Docker).
-5. **Online mode.** The server runs offline mode today, and `hzs` needs online mode on a public address
-   (section 6). Every player then needs an account that owns Java Edition. That is Ludovic's decision.
+horizon.bunchy7s.dev already runs Horizon's own server, hosted by bunchy7s: `horizon-client --dedicated` from the
+current release, without horizon's `horizon-server` supervisor (his answer, 2026-10-29). That settles three things:
+- the world is already a Horizon save in vanilla's Anvil format, so there is nothing to convert;
+- there are no Bedrock players to keep;
+- the baseline for the switch is our own `--dedicated`, the Horizon row of section 1.
+
+`hzs` runs the same engine (3.1), so the switch is a binary swap in the same folder, with the same
+`server.properties`, lists and world.
+
+Still to settle with him (through the orchestrator):
+1. **Kira.** How `/game/ask` reaches Kira today, since the kira-pumpkin plugin was written for Pumpkin. In
+   `hzs`, a built-in `[kira]` bridge registers the command and calls Kira's API on a worker thread. Kira can
+   also read status and players through the control API (`hzs-ops`, token on loopback).
+2. **Anything else he relies on:** a proxy, the query port, scripts that read the log or the console.
+3. **Operations:** his backups, his restarts, how he deploys (systemd, Docker). Also, why he runs without the
+   supervisor (a missing feature, or no need), so that `hzs-ops` covers what he does by hand.
+4. **Online mode.** The server was listed as offline mode. If it still is, `hzs` needs online mode on a public
+   address (section 6), and every player then needs an account that owns Java Edition. That is Ludovic's
+   decision.
 
 The switch-over itself:
-- `hzs` runs beside Pumpkin on another port for a week, with the same whitelist and ops;
+- `hzs` runs beside his `--dedicated` for a week, on a copy of the world and another port, with the same
+  whitelist and ops;
 - Kira's bridge is checked end to end;
-- the 100-bot soak passes on his machine;
-- then DNS moves.
+- the 100-bot soak on his machine beats his `--dedicated` there on the section 2 numbers;
+- then his service starts `hzs` instead. The rollback is the previous binary on the same folder.
 
 ### 9.3 Issues anyone can take (good first ones for a new contributor)
 
