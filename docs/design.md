@@ -10,7 +10,7 @@ welcome. It aims to be the fastest server we can build while keeping vanilla's r
 
 This page holds the measured baseline (section 1), the targets (2), what this repo takes from
 [horizon-rust/horizon](https://github.com/horizon-rust/horizon) and what it writes fresh (3), the design of each
-part with the measured cost it removes (4 to 8), and the plan (9). The supervisor, `server.toml`, the panel,
+part with the measured cost it removes (4 to 8), the plan (9), and what each open horizon PR on the theme brings (appendix A). The supervisor, `server.toml`, the panel,
 backups and the control API are already designed and mostly built in horizon's `docs/server.md` and
 `docs/hosting.md`. This page doesn't repeat them; it says where they go (section 3.3).
 
@@ -444,3 +444,39 @@ The switch-over itself:
   `docs/hosting.md`.
 - **S-6 (#7) bots: report bytes and join time** (`bytes_in`/`bytes_out` per bot from the connection's counters,
   join percentiles), so the bench doesn't need `nettop`.
+
+## Appendix A. Open horizon PRs on the server's theme (2026-10-29)
+
+Each one is **use** (what the server takes from it), **covered** (by what), or **not for the server**. ★ marks
+the ones that should land in horizon first: the server builds on them, so triage should prove them there.
+
+| PR | Author | Verdict |
+|---|---|---|
+| ★ #3815, ★ #3847 | ludovic111 | **use**: tick-thread costs (section 1). In the merger; #3834 merged |
+| ★ #3036 | hectoreccles | **use**: chunk batch bodies on helper threads, the base of W3 (5.3) |
+| ★ #2608 | FusselTV | **use**: nothing kept around spawn while nobody is on. It cuts idle CPU, idle RAM and start time, two of the three numbers where Pumpkin leads. It conflicts since `streaming.rs` moved to `horizon-client-render`; triage carries it if needed, as #2698 did |
+| ★ #3756 | ludovic111 | **use**: the server names itself `horizon`, which the fast path (8) builds on |
+| ★ #3441 | xKumorio | **use**: guests' known movement as vanilla's; server players' gameplay |
+| ★ #3873 | DUzzL | **use**: breeding statistics and advancements credited on the server thread |
+| ★ #3300, ★ #3802 | masa-masa-0314, ThatCakeIsAPie | **use**: a world's data packs reach recipes, loot, advancements, tags and block state providers. Servers run packs |
+| ★ #2698 (carries #2544, #2586) | FusselTV | **use**: structure mobs and generation animals as vanilla's |
+| ★ #2872 | levzzz5154 | **use**: forced chunks get vanilla's rings (`/forceload` farms) |
+| #3480–#3490 | ThatCakeIsAPie | **use**: each level's height from its dimension type (tall-world packs), local and over the network. #3489 (uniform sections shared) also feeds the memory target (7). It's a long stack, so it lands at its own pace |
+| #3491–#3494 | ThatCakeIsAPie | **use**: data-pack biomes, including the biome registry a server sends (#3493) |
+| #3366 | ThatCakeIsAPie | **use**: faster surface rules, i.e. more chunks generated a second for exploring players |
+| #3706, #3878 | arismoko | **use** later (W8): read-only native world and server-tick hooks. A Kira bridge or metrics could be a server mod on them |
+| #3827 | abit-foggy | **use if proven on the server bench**: incremental tick-chunk membership and random-tick bounds touch `tick_blocks` on the server too. It needs the bench and parity, not only the client's frame times |
+| #3868 | spidercraft | **covered** for the server: the dedicated server already runs online mode with the session check. The PR is for LAN and Play with Friends |
+| #3750, #3851 | leifiyoo, DUzzL | **use**: block entities replaced as vanilla does; the axolotl test fix (main's failing `pr_ready` test) |
+| #3369–#3374 | ThatCakeIsAPie | not for the server core: upgrading 26.2 data packs is an owner's tool, which `hzs-ops` can call later |
+| #3201 | damnurmum | not for the server: packet translation for client mods |
+| #3276 | dan4ikx | not for the server now: client audio, UDP and mod payloads. Its client-to-server mod channels must not collide with `horizon:hello` (8) |
+| #3869, #3724, #3023 | spidercraft, aangeraakt, Web-mc1 | not for the server: Play with Friends codes, client skins, the launcher's ViaProxy |
+| #3669, #3841, #3865, #3881 | various | not for the server: client-side fixes |
+
+**Server parity fixes from contributors** land in horizon on their own merits, and the server gets them through the
+pin: #3716, #3645, #3686, #2990, #2987, #2577, #3401, #3621, #3675, #3748, #3875, #3908.
+
+**Closed without merging in the last two weeks**, with a server idea: #628 (packets a second and the server
+line on F3) is the client half of the fast path's `server-stats` capability. The other 16 have no server idea, or are against
+Mojang's rules (#3537, #3681: offline play, other account providers).
