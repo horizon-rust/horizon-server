@@ -433,14 +433,14 @@ The switch-over itself:
 
 ### 9.3 Issues anyone can take (good first ones for a new contributor)
 
-- **S-1 bots: a `fight` behaviour.** Bots in survival that attack the nearest mob and each other. Today's
+- **S-1 (#2) bots: a `fight` behaviour.** Bots in survival that attack the nearest mob and each other. Today's
   bench has no combat. In horizon's `horizon-bots`, the base of every bench.
-- **S-2 bench: bring `sn_run.py` here as `bench/`**, with a `--pre-generated` world copy and a Markdown table
+- **S-2 (#3) bench: bring `sn_run.py` here as `bench/`**, with a `--pre-generated` world copy and a Markdown table
   out of the JSON.
-- **S-3 bench: bots on another machine.** `--bots-via ssh host`, as horizon's `tools/server_bench.py` has.
-- **S-4 skeleton: the workspace** with the pinned git dependencies and a CI job that builds them on Linux and
+- **S-3 (#4) bench: bots on another machine.** `--bots-via ssh host`, as horizon's `tools/server_bench.py` has.
+- **S-4 (#5) skeleton: the workspace** with the pinned git dependencies and a CI job that builds them on Linux and
   macOS.
-- **S-5 docs: an owner's page** comparing `server.properties` to `server.toml`, from horizon's
+- **S-5 (#6) docs: an owner's page** comparing `server.properties` to `server.toml`, from horizon's
   `docs/hosting.md`.
-- **S-6 bots: report bytes and join time** (`bytes_in`/`bytes_out` per bot from the connection's counters,
+- **S-6 (#7) bots: report bytes and join time** (`bytes_in`/`bytes_out` per bot from the connection's counters,
   join percentiles), so the bench doesn't need `nettop`.
